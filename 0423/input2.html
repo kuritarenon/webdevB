@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta viewport="width=device-width, initial-scale=1.0" />
+    <title>ログインスイッチ</title>
+</head>
+
+<body>
+    <h1>ログインスイッチ</h1>
+    <form action="question3.php" method="post">
+        <fieldset>
+            <legend>ログイン状態を選択してください</legend>
+            <div>
+                <input type="radio" id="login" name="login_status" value="true" />
+                <label for="login">ログイン</label>
+            </div>
+            <div>
+                <input type="radio" id="logout" name="login_status" value="false" />
+                <label for="logout">ログアウト</label>
+            </div>
+        </fieldset>
+        <input type="submit" value="送信" />
+    </form>
+</body>
+
+</html>
