@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>楽天新規会員登録</title>
+</head>
+
+<body>
+    <h1>楽天会員登録</h1>
+    <p>会員登録済みではないですか？ <a href="#">ログイン</a></p>
+    <form action="confirm.php" method="post" id="registration-form">
+        <div>
+            <label for="email">メールアドレス（必須）</label>
+            <input type="email" name="email" id="email" required value="test@gmail.com" />
+            <!-- required 必須 属性名 -->
+        </div>
+        <div>
+            <label for="email_confirm">メールアドレス再入力（必須）</label>
+            <input type="email" name="email_confirm" id="email_confirm" required value="test@gmail.com" />
+        </div>
+        <div>
+            <label for="username">ユーザー名</label>
+            <input type="text" name="username" id="username" value="kurita" />
+        </div>
+        <div>
+            <input type="checkbox" name="use_email_as_id" id="use_email_as_id" checked />
+            <label for="use_email_as_id">メールアドレスをユーザIDとして使用</label>
+        </div>
+        <div>
+            <label for="password">パスワード（必須）</label>
+            <input type="password" name="password" id="password" required value="1234" />
+        </div>
+        <div>
+            <label for="password_confirm">パスワード再入力（必須）</label>
+            <input type="password" name="password_confirm" id="password_confirm" required value="1234" />
+        </div>
+        <div>
+            <input type="checkbox" name="show_password" id="show_password" />
+            <label for="show_password">パスワードを表示する</label>
+        </div>
+        <div>
+            <label for="last_name">姓（漢字）（必須）</label>
+            <input type="text" name="last_name" id="last_name" required value="渡来" />
+        </div>
+        <div>
+            <label for="first_name">名（漢字）（必須）</label>
+            <input type="text" name="first_name" id="first_name" required value="電人" />
+        </div>
+        <div>
+            <label for="last_name_kana">姓（カタカナ）（必須）</label>
+            <input type="text" name="last_name_kana" id="last_name_kana" required value="トライ" />
+        </div>
+        <div>
+            <label for="first_name_kana">名（カタカナ）（必須）</label>
+            <input type="text" name="first_name_kana" id="first_name_kana" required value="デント" />
+        </div>
+
+        <p>以下に同意いただいた上で、会員登録をお願いいたします。</p>
+        <ul>
+            <li><a href="#">楽天会員に関する規約</a></li>
+            <li><a href="#">個人情報保護方針</a></li>
+        </ul>
+
+        <div>
+            <!-- チェックボックス 「type=chackbox」 -->
+            <!-- checked チェック済み -->
+            <input type="checkbox" name="subscribe_news" id="subscribe_news" checked />
+            <label for="subscribe_news">楽天会員ニュースを購読する</label>
+        </div>
+        <p>
+            楽天グループのキャンペーンやイベント情報などをご案内するメールマガジンです。
+        </p>
+
+        <div>
+            <button type="submit">確認に進む</button>
+        </div>
+    </form>
+
+    <script src="./validation.js"></script>
+</body>
+
+</html>
