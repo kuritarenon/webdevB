@@ -1,4 +1,3 @@
-<!-- list.php -->
 <!DOCTYPE html>
 <html lang="ja">
 
