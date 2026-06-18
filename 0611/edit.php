@@ -1,15 +1,14 @@
 <?php
-require_once 'functions.php';
+require_once __DIR__ . '/inc/functions.php';
 if (empty($_GET['id'])) {
-    echo "idを指定してください";
-    exit;
+  echo "idを指定してください";
+  exit;
 }
 if (!preg_match('/\A\d{1,11}+\z/u', $_GET['id'])) {
-    echo "idが正しくありません。";
-    exit;
+  echo "idが正しくありません。";
+  exit;
 }
 $id = (int)$_GET['id'];
-//var_dump($id);
 
 $dbh = db_open();
 $sql = "SELECT id,title,isbn,price,publish,author FROM books WHERE id=:id";
@@ -18,10 +17,9 @@ $stml->bindParam(":id", $id, PDO::PARAM_INT);
 $stml->execute();
 $result = $stml->fetch(PDO::FETCH_ASSOC);
 if (!$result) {
-    echo "指定したデータはありません。";
-    exit;
+  echo "指定したデータはありません。";
+  exit;
 }
-var_dump($result);
 
 //取得したデータをフォームに配置
 $title = str2html($result['title']);
@@ -59,22 +57,10 @@ $html_form = <<<EOD
   <button type="submit">送信する</button>
 </form>
 EOD; ?>
-<!DOCTYPE html>
-<html lang="ja">
+<?php
+include __DIR__ . '/inc/header.php';
+echo $html_form; ?>
+<p style="text-align: center; margin-top: 20px;"><a href="index.php">リストに戻る</a></p>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>書籍編集</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-
-<body>
-    <header>
-        <h1>書籍編集</h1>
-    </header>
-    <?php echo $html_form; ?>
-    <p style="text-align: center; margin-top: 20px;"><a href="list.php">リストに戻る</a></p>
-</body>
-
-</html>
+<?php
+include __DIR__ . '/inc/fotter.php';
