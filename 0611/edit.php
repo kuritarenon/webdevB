@@ -1,11 +1,23 @@
 <?php
 require_once __DIR__ . '/inc/functions.php';
 if (empty($_GET['id'])) {
-  echo "idを指定してください";
+  include __DIR__ . '/inc/header.php';
+  echo '<div class="message-card error">';
+  echo '<div class="icon">⚠</div>';
+  echo '<p class="msg">idを指定してください。</p>';
+  echo '<p class="back-link"><a href="index.php">リストへ戻る</a></p>';
+  echo '</div>';
+  include __DIR__ . '/inc/fotter.php';
   exit;
 }
 if (!preg_match('/\A\d{1,11}+\z/u', $_GET['id'])) {
-  echo "idが正しくありません。";
+  include __DIR__ . '/inc/header.php';
+  echo '<div class="message-card error">';
+  echo '<div class="icon">⚠</div>';
+  echo '<p class="msg">idが正しくありません。</p>';
+  echo '<p class="back-link"><a href="index.php">リストへ戻る</a></p>';
+  echo '</div>';
+  include __DIR__ . '/inc/fotter.php';
   exit;
 }
 $id = (int)$_GET['id'];
@@ -17,7 +29,13 @@ $stml->bindParam(":id", $id, PDO::PARAM_INT);
 $stml->execute();
 $result = $stml->fetch(PDO::FETCH_ASSOC);
 if (!$result) {
-  echo "指定したデータはありません。";
+  include __DIR__ . '/inc/header.php';
+  echo '<div class="message-card error">';
+  echo '<div class="icon">⚠</div>';
+  echo '<p class="msg">指定したデータはありません。</p>';
+  echo '<p class="back-link"><a href="index.php">リストへ戻る</a></p>';
+  echo '</div>';
+  include __DIR__ . '/inc/fotter.php';
   exit;
 }
 

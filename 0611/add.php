@@ -19,10 +19,17 @@ VALUES (NULL, :title, :isbn, :price, :publish, :author)";
     $stmt->bindParam(':author', $_POST['author'], PDO::PARAM_STR);
 
     $stmt->execute();
-    echo "データが追加されました。<br>";
-    echo '<a href="index.php">リストへ戻る</a>';
+    echo '<div class="message-card success">';
+    echo '<div class="icon">✓</div>';
+    echo '<p class="msg">データが追加されました。</p>';
+    echo '<p class="back-link"><a href="index.php">リストへ戻る</a></p>';
+    echo '</div>';
 } catch (PDOException $e) {
-    echo 'エラー: ' . str2html($e->getMessage()) . '<br>';
+    echo '<div class="message-card error">';
+    echo '<div class="icon">⚠</div>';
+    echo '<p class="msg">エラーが発生しました: ' . str2html($e->getMessage()) . '</p>';
+    echo '<p class="back-link"><a href="index.php">リストへ戻る</a></p>';
+    echo '</div>';
     exit;
 }
 
