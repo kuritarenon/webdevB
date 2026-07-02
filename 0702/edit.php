@@ -1,4 +1,10 @@
 <?php
+require_once __DIR__ . '/login_check.php';
+//session_start(); //いらないかも。
+$token = bin2hex(random_bytes(20));
+$_SESSION['token'] = $token;
+
+require_once __DIR__ . '/login_check.php';
 require_once __DIR__ . '/inc/functions.php';
 if (empty($_GET['id'])) {
   include __DIR__ . '/inc/header.php';
