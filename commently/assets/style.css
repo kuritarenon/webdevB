@@ -1,1 +1,421 @@
-/* Main stylesheet */
+/* assets/style.css */
+
+:root {
+    --sky-50: #f4fbff;
+    --sky-100: #e1f4fc;
+    --sky-200: #bce7f7;
+    --sky-400: #46b5dc;
+    --sky-500: #1598c7;
+    --sky-700: #116b91;
+    --ink: #173746;
+    --muted: #64818d;
+    --border: #cde7f1;
+    --white: #ffffff;
+    --danger: #c94b59;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--ink);
+    background: linear-gradient(135deg, var(--sky-50), #e8f8fc);
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Yu Gothic", sans-serif;
+    line-height: 1.6;
+}
+
+a {
+    color: var(--sky-700);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 16px clamp(20px, 5vw, 72px);
+    color: var(--white);
+    background: linear-gradient(100deg, #128fbd, #43b9df);
+    box-shadow: 0 3px 14px rgb(18 107 145 / 18%);
+}
+
+.site-logo {
+    margin: 0;
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    letter-spacing: .03em;
+}
+
+.site-nav {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    font-size: .95rem;
+}
+
+.site-nav a {
+    color: var(--white);
+}
+
+.site-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(320px, .9fr);
+    gap: clamp(20px, 3vw, 40px);
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: clamp(24px, 4vw, 48px);
+}
+
+.movie,
+.comments,
+.site-main > form {
+    background: rgb(255 255 255 / 92%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgb(23 92 116 / 9%);
+}
+
+.movie {
+    align-self: start;
+    padding: clamp(14px, 2vw, 24px);
+}
+
+.movie video,
+.youtube-player {
+    display: block;
+    width: 100%;
+    border-radius: 10px;
+    background: #062f40;
+}
+
+.youtube-player {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+}
+
+.youtube-player iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.movie video {
+    max-height: 70vh;
+}
+
+.movie__title {
+    margin: 18px 0 2px;
+    font-size: clamp(1.1rem, 2vw, 1.45rem);
+}
+
+.movie__channel {
+    margin: 0;
+    color: var(--muted);
+}
+
+.youtube-channel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+    padding: 12px;
+    background: var(--sky-50);
+    border-radius: 10px;
+}
+
+.youtube-channel img {
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--sky-200);
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.youtube-channel p {
+    margin: 1px 0 0;
+    color: var(--muted);
+    font-size: .87rem;
+}
+
+.movie__latest-heading {
+    margin: 22px 0 8px;
+    font-size: 1rem;
+}
+
+.youtube-video-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.youtube-video-list a {
+    display: grid;
+    gap: 5px;
+    font-size: .83rem;
+    line-height: 1.4;
+}
+
+.youtube-video-list img {
+    width: 100%;
+    border-radius: 7px;
+}
+
+.youtube-unavailable {
+    padding: 32px 18px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.comments {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: calc(100vh - 150px);
+    padding: 22px;
+}
+
+.comments__count {
+    margin: 0 0 14px;
+    font-size: 1.15rem;
+}
+
+.comment-form,
+.reply-form {
+    display: grid;
+    gap: 9px;
+}
+
+textarea,
+input[type="text"],
+input[type="password"],
+input[type="file"] {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--ink);
+    background: var(--white);
+    font: inherit;
+}
+
+textarea {
+    min-height: 76px;
+    resize: vertical;
+}
+
+textarea:focus,
+input:focus {
+    outline: 3px solid rgb(70 181 220 / 24%);
+    border-color: var(--sky-400);
+}
+
+button {
+    width: fit-content;
+    border: 0;
+    border-radius: 7px;
+    padding: 8px 14px;
+    color: var(--white);
+    background: var(--sky-500);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+button:hover {
+    background: var(--sky-700);
+}
+
+.comment-list,
+.reply-list {
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.comment-list {
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-color: var(--sky-200) transparent;
+}
+
+.comment {
+    display: flex;
+    gap: 12px;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--sky-100);
+}
+
+.comment__body {
+    min-width: 0;
+    flex: 1;
+}
+
+.comment__meta,
+.comment__text,
+.comment__actions {
+    margin: 0;
+}
+
+.comment__meta {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    color: var(--muted);
+    font-size: .85rem;
+}
+
+.comment__meta strong {
+    color: var(--sky-700);
+}
+
+.comment__text {
+    margin-top: 5px;
+    overflow-wrap: anywhere;
+}
+
+.comment__actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+    font-size: .9rem;
+}
+
+.comment__actions button,
+.reply-toggle {
+    padding: 5px 9px;
+    font-size: .82rem;
+}
+
+.replies {
+    margin-top: 12px;
+    padding: 0 0 0 12px;
+    border-left: 3px solid var(--sky-200);
+}
+
+.reply-list {
+    margin-top: 0;
+}
+
+.reply {
+    display: flex;
+    gap: 9px;
+    padding: 10px 0;
+}
+
+.reply > div {
+    min-width: 0;
+}
+
+.reply-form {
+    margin-top: 10px;
+}
+
+/* JSトグルで返信スレッドを開閉するのに使う */
+.hidden {
+    display: none;
+}
+
+/* フォームや削除ボタンを横並びに置くための補助 */
+.inline {
+    display: inline;
+}
+
+.user-icon {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border: 2px solid var(--sky-200);
+    border-radius: 50%;
+    display: inline-block;
+    object-fit: cover;
+}
+
+.error {
+    color: var(--danger);
+    font-weight: 700;
+}
+
+.site-footer {
+    padding: 18px;
+    color: var(--muted);
+    text-align: center;
+    font-size: .85rem;
+}
+
+/* ログイン・登録画面 */
+.site-main > h2,
+.site-main > .error,
+.site-main > form {
+    grid-column: 1 / -1;
+}
+
+.site-main > h2 {
+    margin: 0;
+}
+
+.site-main > form {
+    width: min(100%, 520px);
+    padding: 24px;
+}
+
+.site-main > form p {
+    margin: 0 0 16px;
+}
+
+.site-main > form label {
+    display: grid;
+    gap: 6px;
+    font-weight: 700;
+}
+
+@media (max-width: 850px) {
+    .site-main {
+        grid-template-columns: 1fr;
+    }
+
+    .comments {
+        max-height: none;
+    }
+
+    .comment-list {
+        max-height: 60vh;
+    }
+}
+
+@media (max-width: 520px) {
+    .site-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .site-nav {
+        justify-content: flex-start;
+    }
+
+    .site-main {
+        padding: 18px;
+    }
+
+    .comments {
+        padding: 16px;
+    }
+}

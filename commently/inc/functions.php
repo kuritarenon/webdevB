@@ -37,3 +37,93 @@ function render_icon(array $user): string
     }
     return '<span class="user-icon user-icon--color" style="background:' . str2html($user['color']) . '"></span>';
 }
+
+/**
+ * YouTube Data API から HIKAKIN TV のチャンネル情報と最新動画を取得する。
+ * API キーは Web 公開ディレクトリ外の環境変数 YOUTUBE_API_KEY に設定する。
+ */
+function get_hikakin_movies(int $limit = 6): array
+{
+    $apiKey = getenv('YOUTUBE_API_KEY');
+    if (!$apiKey) {
+        return ['error' => 'YouTube API キーが設定されていません。'];
+    }
+
+    // HIKAKIN TV の公式チャンネル ID
+    $channelId = 'UCZf__ehlCEBPop-_sldpBUQ';
+    $channelResponse = youtube_api_get('channels', [
+        'part' => 'snippet,contentDetails,statistics',
+        'id' => $channelId,
+        'key' => $apiKey,
+    ]);
+
+    if (!empty($channelResponse['error']) || empty($channelResponse['items'][0])) {
+        return ['error' => 'チャンネル情報を取得できませんでした。'];
+    }
+
+    $channel = $channelResponse['items'][0];
+    $uploadsId = $channel['contentDetails']['relatedPlaylists']['uploads'] ?? '';
+    if ($uploadsId === '') {
+        return ['error' => '動画一覧を取得できませんでした。'];
+    }
+
+    $videoResponse = youtube_api_get('playlistItems', [
+        'part' => 'snippet,contentDetails',
+        'playlistId' => $uploadsId,
+        'maxResults' => max(1, min($limit, 12)),
+        'key' => $apiKey,
+    ]);
+
+    if (!empty($videoResponse['error'])) {
+        return ['error' => '動画一覧を取得できませんでした。'];
+    }
+
+    return [
+        'channel' => [
+            'name' => $channel['snippet']['title'] ?? 'HIKAKIN TV',
+            'icon' => $channel['snippet']['thumbnails']['medium']['url']
+                ?? $channel['snippet']['thumbnails']['default']['url'] ?? '',
+            'video_count' => (int)($channel['statistics']['videoCount'] ?? 0),
+            'url' => 'https://www.youtube.com/channel/' . $channelId,
+        ],
+        'videos' => array_values(array_filter(array_map(static function (array $item): ?array {
+            $snippet = $item['snippet'] ?? [];
+            $videoId = $snippet['resourceId']['videoId'] ?? '';
+            if ($videoId === '' || ($snippet['title'] ?? '') === 'Private video') {
+                return null;
+            }
+            return [
+                'id' => $videoId,
+                'title' => $snippet['title'] ?? '',
+                'published_at' => $snippet['publishedAt'] ?? '',
+                'thumbnail' => $snippet['thumbnails']['medium']['url']
+                    ?? $snippet['thumbnails']['default']['url'] ?? '',
+            ];
+        }, $videoResponse['items'] ?? []))),
+    ];
+}
+
+/** YouTube Data API に GET リクエストを送る。 */
+function youtube_api_get(string $resource, array $params): array
+{
+    $url = 'https://www.googleapis.com/youtube/v3/' . $resource . '?' . http_build_query($params);
+    $body = false;
+
+    if (function_exists('curl_init')) {
+        $curl = curl_init($url);
+        curl_setopt_array($curl, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+        ]);
+        $body = curl_exec($curl);
+        curl_close($curl);
+    } else {
+        $body = @file_get_contents($url, false, stream_context_create([
+            'http' => ['timeout' => 10],
+        ]));
+    }
+
+    $data = is_string($body) ? json_decode($body, true) : null;
+    return is_array($data) ? $data : ['error' => ['message' => 'request failed']];
+}
