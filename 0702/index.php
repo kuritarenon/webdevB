@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/login_check.php';
-include_once __DIR__ . '/inc/header.php';
 require_once __DIR__ . '/inc/functions.php';
+include __DIR__ . '/inc/header.php';
 try {
     $dbh = db_open();
     $sql = 'SELECT * FROM books';

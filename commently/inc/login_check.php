@@ -1,8 +1,9 @@
 <?php
+// inc/login_check.php
 if (!isset($_SESSION)) {
     session_start();
 }
-if (!isset($_SESSION['login'])) {
+if (empty($_SESSION['login'])) {
     header('Location: login.php');
     exit;
 }
