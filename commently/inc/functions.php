@@ -1,6 +1,32 @@
 <?php
 // inc/functions.php
 
+/**
+ * 開発環境用にプロジェクト直下の .env を読み込む。
+ * 本番環境ではサーバー側の環境変数を優先する。
+ */
+function load_local_env(): void
+{
+    $envFile = dirname(__DIR__) . '/.env';
+    if (!is_readable($envFile)) {
+        return;
+    }
+
+    $values = parse_ini_file($envFile, false, INI_SCANNER_RAW);
+    if (!is_array($values)) {
+        return;
+    }
+
+    foreach ($values as $name => $value) {
+        if (getenv($name) === false) {
+            putenv($name . '=' . $value);
+            $_ENV[$name] = $value;
+        }
+    }
+}
+
+load_local_env();
+
 const ICON_PALETTE = [
     '#e6749f',
     '#7ac74f',

@@ -1,17 +1,17 @@
 /* assets/style.css */
 
 :root {
-    --sky-50: #f4fbff;
-    --sky-100: #e1f4fc;
-    --sky-200: #bce7f7;
-    --sky-400: #46b5dc;
-    --sky-500: #1598c7;
-    --sky-700: #116b91;
-    --ink: #173746;
-    --muted: #64818d;
-    --border: #cde7f1;
+    --sky-50: #f4fcf8;
+    --sky-100: #def5ea;
+    --sky-200: #b9e8d2;
+    --sky-400: #74c7a5;
+    --sky-500: #4aa67d;
+    --sky-700: #5b3a29;
+    --ink: #4a3427;
+    --muted: #7a665a;
+    --border: #cfe7dc;
     --white: #ffffff;
-    --danger: #c94b59;
+    --danger: #b85b5b;
 }
 
 * {
@@ -22,7 +22,7 @@ body {
     margin: 0;
     min-height: 100vh;
     color: var(--ink);
-    background: linear-gradient(135deg, var(--sky-50), #e8f8fc);
+    background: linear-gradient(135deg, #f5fcf8, #e6f8ef);
     font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Yu Gothic", sans-serif;
     line-height: 1.6;
 }
@@ -43,8 +43,13 @@ a:hover {
     justify-content: space-between;
     gap: 24px;
     padding: 16px clamp(20px, 5vw, 72px);
-    color: var(--white);
-    background: linear-gradient(100deg, #128fbd, #43b9df);
+    color: var(--sky-700);
+    font-weight: 800;
+    background-color: #74c7a5;
+    background-image:
+        radial-gradient(rgba(91, 58, 41, .35) 2px, transparent 2px);
+    background-size: 22px 22px, 100% 100%;
+    background-position: 0 0, 0 0;
     box-shadow: 0 3px 14px rgb(18 107 145 / 18%);
 }
 
@@ -64,7 +69,21 @@ a:hover {
 }
 
 .site-nav a {
-    color: var(--white);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    color: var(--sky-700);
+    font-weight: 800;
+    background: var(--white);
+    border-radius: 999px;
+    text-decoration: none;
+    transition: .2s;
+}
+
+.site-nav a:hover {
+    background: var(--sky-100);
+    text-decoration: none;
 }
 
 .site-main {
@@ -78,7 +97,7 @@ a:hover {
 
 .movie,
 .comments,
-.site-main > form {
+.site-main>form {
     background: rgb(255 255 255 / 92%);
     border: 1px solid var(--border);
     border-radius: 16px;
@@ -228,15 +247,12 @@ button {
     border: 0;
     border-radius: 7px;
     padding: 8px 14px;
-    color: var(--white);
-    background: var(--sky-500);
     cursor: pointer;
-    font: inherit;
     font-weight: 700;
 }
 
 button:hover {
-    background: var(--sky-700);
+    background: var(--sky-400);
 }
 
 .comment-list,
@@ -300,8 +316,24 @@ button:hover {
 
 .comment__actions button,
 .reply-toggle {
-    padding: 5px 9px;
+    padding: 4px 6px;
     font-size: .82rem;
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    box-shadow: none;
+}
+
+.comment__actions button:hover,
+.reply-toggle:hover {
+    background: var(--sky-100);
+    color: var(--sky-500);
+    text-decoration: none;
+    border-radius: 999px;
+}
+
+.comment__actions form {
+    display: inline;
 }
 
 .replies {
@@ -320,7 +352,7 @@ button:hover {
     padding: 10px 0;
 }
 
-.reply > div {
+.reply>div {
     min-width: 0;
 }
 
@@ -361,29 +393,198 @@ button:hover {
 }
 
 /* ログイン・登録画面 */
-.site-main > h2,
-.site-main > .error,
-.site-main > form {
+.site-main>h2,
+.site-main>.error,
+.site-main>form {
     grid-column: 1 / -1;
+    justify-self: center;
 }
 
-.site-main > h2 {
+.site-main>h2 {
     margin: 0;
+    text-align: center;
 }
 
-.site-main > form {
+.site-main>.error {
+    text-align: center;
+}
+
+.site-main>form {
     width: min(100%, 520px);
     padding: 24px;
 }
 
-.site-main > form p {
+.site-main>form p {
     margin: 0 0 16px;
 }
 
-.site-main > form label {
+.site-main>form label {
     display: grid;
     gap: 6px;
     font-weight: 700;
+}
+
+/* コメント検索 */
+.comment-search-form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.comment-search-form input {
+    flex: 1;
+    min-width: 220px;
+    border-radius: 999px;
+}
+
+.search-btn {
+    border-radius: 999px;
+    padding: 10px 18px;
+}
+
+.show-all-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: var(--sky-100);
+    color: var(--sky-700);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.show-all-btn:hover {
+    background: var(--sky-200);
+    text-decoration: none;
+}
+
+.search-result {
+    margin: 0 0 16px;
+    padding: 12px 16px;
+    border-left: 4px solid var(--sky-500);
+    background: var(--sky-50);
+    border-radius: 8px;
+}
+
+.search-result strong {
+    color: var(--sky-700);
+}
+
+.no-result {
+    border-left-color: var(--danger);
+}
+
+/* ==========================
+   コメント入力
+========================== */
+
+.comment-footer {
+
+    position: sticky;
+
+    bottom: 0;
+
+    background: #fff;
+
+    padding: 14px;
+
+    border-top: 1px solid var(--border);
+
+    margin-top: auto;
+
+}
+
+.comment-toggle {
+
+    width: 100%;
+
+    padding: 14px;
+
+    border-radius: 10px;
+
+    font-size: 16px;
+
+}
+
+.comment-form {
+
+    margin-top: 14px;
+
+}
+
+/* ==========================
+   コメント件数・並び替え
+========================== */
+
+.comments-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.comments__count {
+    margin: 0;
+    font-size: 1.15rem;
+}
+
+.sort-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sort-form::before {
+    content: "並び替え";
+    color: var(--muted);
+    font-size: .9rem;
+    font-weight: 700;
+}
+
+.sort-form select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    min-width: 120px;
+    padding: 10px 40px 10px 16px;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    background-color: var(--white);
+    color: var(--ink);
+
+    font-size: .9rem;
+    font-weight: 700;
+
+    cursor: pointer;
+    transition: .2s;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23116b91' viewBox='0 0 16 16'%3E%3Cpath d='M3.204 5h9.592L8 10.481 3.204 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+}
+
+.sort-form select:hover {
+    border-color: var(--sky-400);
+    box-shadow: 0 4px 12px rgb(70 181 220 / 15%);
+}
+
+.sort-form select:focus {
+    outline: none;
+    border-color: var(--sky-500);
+    box-shadow: 0 0 0 4px rgb(70 181 220 / 18%);
+}
+
+.site-main>form>button[type="submit"] {
+    display: block;
+    margin: 24px auto 0;
 }
 
 @media (max-width: 850px) {

@@ -54,6 +54,20 @@ $youtube = get_hikakin_movies();
     // index.php の <section class="comments"> の中身
     $dbh = db_open();
 
+    $keyword = trim($_GET['keyword'] ?? '');
+    $sort = $_GET['sort'] ?? 'latest';
+    $orderBy = 'posts.created_at DESC';
+    if ($sort === 'popular') {
+        $orderBy = 'good_count DESC, posts.created_at DESC';
+    }
+
+    $where = '';
+    $params = [];
+    if ($keyword !== '') {
+        $where = 'WHERE posts.content LIKE :keyword';
+        $params[':keyword'] = '%' . $keyword . '%';
+    }
+
     // 投稿一覧を、投稿者のユーザー情報と一緒に取得
     $sql = '
   SELECT posts.*, users.username, users.icon_path, users.color,
@@ -61,9 +75,12 @@ $youtube = get_hikakin_movies();
     (SELECT COUNT(*) FROM likes   WHERE likes.post_id   = posts.id AND type = "good") AS good_count
   FROM posts
   JOIN users ON posts.user_id = users.id
-  ORDER BY posts.created_at DESC
+  ' . $where . '
+  ORDER BY ' . $orderBy . '
 ';
-    $posts = $dbh->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute($params);
+    $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $total = count($posts);
 
     // 一覧SELECTのすぐ後に、投稿ごとの返信を取得しておく
@@ -87,17 +104,39 @@ $youtube = get_hikakin_movies();
     $token = bin2hex(random_bytes(20));
     $_SESSION['token'] = $token;
     ?>
-    <h2 class="comments__count"><?= $total ?>件のコメント</h2>
+    <form method="get" class="comment-search-form">
+        <input type="text" name="keyword" value="<?= str2html($keyword) ?>" placeholder="コメントを検索">
 
-    <?php if (!empty($_SESSION['login'])): ?>
-        <form method="post" action="post_add.php" class="comment-form">
-            <input type="hidden" name="token" value="<?= str2html($token) ?>">
-            <textarea name="content" required placeholder="コメントを入力"></textarea>
-            <button type="submit">投稿する</button>
-        </form>
-    <?php else: ?>
-        <p><a href="login.php">ログイン</a>するとコメントできます。</p>
+        <button type="submit" class="search-btn">🔍 検索</button>
+
+        <?php if ($keyword !== ''): ?>
+            <a href="index.php" class="show-all-btn">すべてのコメント</a>
+        <?php endif; ?>
+    </form>
+
+    <?php if ($keyword !== ''): ?>
+        <?php if ($total > 0): ?>
+            <p class="search-result">
+                「<strong><?= str2html($keyword) ?></strong>」の検索結果：<?= $total ?>件
+            </p>
+        <?php else: ?>
+            <p class="search-result no-result">
+                「<strong><?= str2html($keyword) ?></strong>」に一致するコメントはありませんでした。
+            </p>
+        <?php endif; ?>
     <?php endif; ?>
+
+    <div class="comments-header">
+        <h2 class="comments__count"><?= $total ?>件のコメント</h2>
+
+        <form method="get" class="sort-form">
+            <input type="hidden" name="keyword" value="<?= str2html($keyword) ?>">
+            <select name="sort" onchange="this.form.submit()">
+                <option value="latest" <?= $sort === 'latest' ? 'selected' : '' ?>>最新順</option>
+                <option value="popular" <?= $sort === 'popular' ? 'selected' : '' ?>>おすすめ順</option>
+            </select>
+        </form>
+    </div>
 
     <ul class="comment-list">
         <?php foreach ($posts as $post): ?>
@@ -129,13 +168,6 @@ $youtube = get_hikakin_movies();
                     <span>👎</span>
                 <?php endif; ?>
 
-                <?php if ((int)$post['reply_count'] > 0): ?>
-                    <button type="button" class="reply-toggle"
-                        data-target="replies-<?= (int)$post['id'] ?>">
-                        <?= (int)$post['reply_count'] ?>件の返信を表示
-                    </button>
-                <?php endif; ?>
-
                 <?php if (!empty($_SESSION['login']) && (int)$_SESSION['user_id'] === (int)$post['user_id']): ?>
                     <form method="post" action="post_delete.php" class="inline"
                         onsubmit="return confirm('削除しますか？');">
@@ -143,6 +175,15 @@ $youtube = get_hikakin_movies();
                         <input type="hidden" name="post_id" value="<?= (int)$post['id'] ?>">
                         <button type="submit">削除</button>
                     </form>
+                    <button type="button" class="reply-toggle"
+                        data-target="replies-<?= (int)$post['id'] ?>">
+                        💬 返信<?= (int)$post['reply_count'] > 0 ? '（' . (int)$post['reply_count'] . '件）' : '' ?>
+                    </button>
+                <?php else: ?>
+                    <button type="button" class="reply-toggle"
+                        data-target="replies-<?= (int)$post['id'] ?>">
+                        💬 返信<?= (int)$post['reply_count'] > 0 ? '（' . (int)$post['reply_count'] . '件）' : '' ?>
+                    </button>
                 <?php endif; ?>
                 </p>
 
@@ -176,6 +217,30 @@ $youtube = get_hikakin_movies();
 
         <?php endforeach; ?>
     </ul>
+
+    <?php if (!empty($_SESSION['login'])): ?>
+        <div class="comment-footer">
+            <button type="button" id="comment-toggle" class="comment-toggle">
+                💬 コメントを書く
+            </button>
+
+            <form method="post"
+                action="post_add.php"
+                class="comment-form hidden"
+                id="comment-form">
+
+                <input type="hidden" name="token" value="<?= str2html($token) ?>">
+
+                <textarea name="content" required placeholder="コメントを入力"></textarea>
+
+                <button type="submit">投稿する</button>
+            </form>
+        </div>
+    <?php else: ?>
+        <div class="comment-footer">
+            <p><a href="login.php">ログイン</a>するとコメントできます。</p>
+        </div>
+    <?php endif; ?>
 
 </section>
 <?php include __DIR__ . '/inc/footer.php'; ?>
