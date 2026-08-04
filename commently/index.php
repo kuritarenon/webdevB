@@ -7,10 +7,34 @@ $youtube = get_hikakin_movies();
 ?>
 <article class="movie">
     <?php if (!empty($youtube['videos'])):
-        $latestVideo = $youtube['videos'][0];
-        $publishedAt = new DateTimeImmutable($latestVideo['published_at']);
+        $normalVideos = array_values(array_filter($youtube['videos'], function ($video) {
+            $title = $video['title'] ?? '';
+            $liveStatus = $video['liveBroadcastContent'] ?? '';
+
+            // 配信予定・配信中のLIVEを除外
+            if ($liveStatus === 'upcoming' || $liveStatus === 'live') {
+                return false;
+            }
+
+            // APIから状態が取得できない場合はタイトルでも除外
+            if (
+                stripos($title, 'LIVE') !== false
+                || stripos($title, 'ライブ') !== false
+                || stripos($title, '配信') !== false
+            ) {
+                return false;
+            }
+
+            return true;
+        }));
+
+        // 通常動画がない場合は表示しない（LIVEを代わりに出さない）
+        $latestVideo = $normalVideos[0] ?? null;
+        if ($latestVideo) {
+            $publishedAt = new DateTimeImmutable($latestVideo['published_at']);
+        }
     ?>
-        <div class="youtube-player">
+        <div class="youtube-player" data-current-video-id="<?= str2html($latestVideo['id']) ?>">
             <iframe src="https://www.youtube-nocookie.com/embed/<?= str2html($latestVideo['id']) ?>"
                 title="<?= str2html($latestVideo['title']) ?>" allowfullscreen
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
@@ -32,12 +56,12 @@ $youtube = get_hikakin_movies();
 
         <h3 class="movie__latest-heading">最新の投稿</h3>
         <ul class="youtube-video-list">
-            <?php foreach (array_slice($youtube['videos'], 1) as $video): ?>
-                <li>
-                    <a href="https://www.youtube.com/watch?v=<?= str2html($video['id']) ?>" target="_blank" rel="noopener noreferrer">
-                        <img src="<?= str2html($video['thumbnail']) ?>" alt="">
-                        <span><?= str2html($video['title']) ?></span>
-                    </a>
+            <?php foreach (array_slice($normalVideos, 1) as $video): ?>
+                <li class="youtube-video-item">
+                    <button type="button" class="youtube-thumbnail" data-video-id="<?= str2html($video['id']) ?>" data-title="<?= str2html($video['title']) ?>">
+                        <img src="<?= str2html($video['thumbnail']) ?>" alt="<?= str2html($video['title']) ?>">
+                        <p><?= str2html($video['title']) ?></p>
+                    </button>
                 </li>
             <?php endforeach; ?>
         </ul>
@@ -49,7 +73,7 @@ $youtube = get_hikakin_movies();
     <?php endif; ?>
 </article>
 
-<section class="comments">
+<section class="comments" data-video-id="<?= str2html($latestVideo['id']) ?>">
     <?php
     // index.php の <section class="comments"> の中身
     $dbh = db_open();
@@ -63,6 +87,7 @@ $youtube = get_hikakin_movies();
 
     $where = '';
     $params = [];
+
     if ($keyword !== '') {
         $where = 'WHERE posts.content LIKE :keyword';
         $params[':keyword'] = '%' . $keyword . '%';
@@ -230,6 +255,7 @@ $youtube = get_hikakin_movies();
                 id="comment-form">
 
                 <input type="hidden" name="token" value="<?= str2html($token) ?>">
+                <input type="hidden" name="video_id" value="<?= str2html($latestVideo['id']) ?>">
 
                 <textarea name="content" required placeholder="コメントを入力"></textarea>
 
@@ -243,4 +269,35 @@ $youtube = get_hikakin_movies();
     <?php endif; ?>
 
 </section>
+<script>
+    document.querySelectorAll('.youtube-thumbnail').forEach(button => {
+        button.addEventListener('click', () => {
+            const videoId = button.dataset.videoId;
+            const title = button.dataset.title;
+            const player = document.querySelector('.youtube-player iframe');
+            const movieTitle = document.querySelector('.movie__title');
+
+            player.src = `https://www.youtube-nocookie.com/embed/${videoId}`;
+            player.title = title;
+            movieTitle.textContent = title;
+
+            const comments = document.querySelector('.comments');
+            if (comments) {
+                comments.dataset.videoId = videoId;
+            }
+            const videoInput = document.querySelector('input[name="video_id"]');
+            if (videoInput) {
+                videoInput.value = videoId;
+            }
+            const url = new URL(window.location.href);
+            url.searchParams.set('video_id', videoId);
+            window.location.href = url.toString();
+
+            window.scrollTo({
+                top: document.querySelector('.youtube-player').offsetTop,
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>
 <?php include __DIR__ . '/inc/footer.php'; ?>
