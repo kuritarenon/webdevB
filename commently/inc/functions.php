@@ -68,7 +68,7 @@ function render_icon(array $user): string
  * YouTube Data API から HIKAKIN TV のチャンネル情報と最新動画を取得する。
  * API キーは Web 公開ディレクトリ外の環境変数 YOUTUBE_API_KEY に設定する。
  */
-function get_hikakin_movies(int $limit = 6): array
+function get_hikakin_movies(int $limit = 12): array
 {
     $apiKey = getenv('YOUTUBE_API_KEY');
     if (!$apiKey) {
@@ -93,15 +93,98 @@ function get_hikakin_movies(int $limit = 6): array
         return ['error' => '動画一覧を取得できませんでした。'];
     }
 
-    $videoResponse = youtube_api_get('playlistItems', [
+    // 配信予定（LIVE）を除外しても十分な本数が残るよう多めに取得する
+    $playlistResponse = youtube_api_get('playlistItems', [
         'part' => 'snippet,contentDetails',
         'playlistId' => $uploadsId,
-        'maxResults' => max(1, min($limit, 12)),
+        'maxResults' => max(1, min($limit * 2, 24)),
         'key' => $apiKey,
     ]);
 
-    if (!empty($videoResponse['error'])) {
+    if (!empty($playlistResponse['error']) || empty($playlistResponse['items'])) {
         return ['error' => '動画一覧を取得できませんでした。'];
+    }
+
+    // 動画IDの抽出
+    $videoIds = [];
+    $rawItemsMap = [];
+    foreach ($playlistResponse['items'] as $item) {
+        $snippet = $item['snippet'] ?? [];
+        $videoId = $snippet['resourceId']['videoId'] ?? '';
+        if ($videoId !== '' && ($snippet['title'] ?? '') !== 'Private video') {
+            $videoIds[] = $videoId;
+            $rawItemsMap[$videoId] = $item;
+        }
+    }
+
+    if (empty($videoIds)) {
+        return ['error' => '動画が見つかりませんでした。'];
+    }
+
+    // videos エンドポイントで liveBroadcastContent および liveStreamingDetails を取得
+    $videoDetailsResponse = youtube_api_get('videos', [
+        'part' => 'snippet,liveStreamingDetails',
+        'id' => implode(',', $videoIds),
+        'key' => $apiKey,
+    ]);
+
+    $detailsMap = [];
+    if (!empty($videoDetailsResponse['items'])) {
+        foreach ($videoDetailsResponse['items'] as $vItem) {
+            $detailsMap[$vItem['id']] = [
+                'liveBroadcastContent' => $vItem['snippet']['liveBroadcastContent'] ?? 'none',
+                'liveStreamingDetails' => $vItem['liveStreamingDetails'] ?? null,
+            ];
+        }
+    }
+
+    $videos = [];
+    foreach ($videoIds as $videoId) {
+        $item = $rawItemsMap[$videoId] ?? [];
+        $snippet = $item['snippet'] ?? [];
+        $title = $snippet['title'] ?? '';
+        $thumbnail = $snippet['thumbnails']['medium']['url']
+            ?? $snippet['thumbnails']['default']['url'] ?? '';
+
+        $detail = $detailsMap[$videoId] ?? [];
+        $liveStatus = $detail['liveBroadcastContent'] ?? 'none';
+        $streamingDetails = $detail['liveStreamingDetails'] ?? null;
+
+        // 配信予定（upcoming）または現在配信中（live）を除外
+        if ($liveStatus === 'upcoming' || $liveStatus === 'live') {
+            continue;
+        }
+
+        // liveStreamingDetails に scheduledStartTime があり actualStartTime が無い場合も未配信LIVE
+        if (!empty($streamingDetails['scheduledStartTime']) && empty($streamingDetails['actualStartTime'])) {
+            continue;
+        }
+
+        // サムネイル画像URLに _live が含まれる場合も未配信LIVEとして除外
+        if (strpos($thumbnail, '_live') !== false) {
+            continue;
+        }
+
+        // タイトルによる補助チェック（配信予定・生配信などのキーワード）
+        if (
+            stripos($title, '配信予定') !== false ||
+            stripos($title, 'ライブ配信予定') !== false ||
+            (stripos($title, 'LIVE') !== false && stripos($title, 'スタート') !== false)
+        ) {
+            continue;
+        }
+
+        $videos[] = [
+            'id' => $videoId,
+            'title' => $title,
+            'published_at' => $snippet['publishedAt'] ?? '',
+            'thumbnail' => $thumbnail,
+            'liveBroadcastContent' => $liveStatus,
+        ];
+
+        if (count($videos) >= $limit) {
+            break;
+        }
     }
 
     return [
@@ -112,20 +195,7 @@ function get_hikakin_movies(int $limit = 6): array
             'video_count' => (int)($channel['statistics']['videoCount'] ?? 0),
             'url' => 'https://www.youtube.com/channel/' . $channelId,
         ],
-        'videos' => array_values(array_filter(array_map(static function (array $item): ?array {
-            $snippet = $item['snippet'] ?? [];
-            $videoId = $snippet['resourceId']['videoId'] ?? '';
-            if ($videoId === '' || ($snippet['title'] ?? '') === 'Private video') {
-                return null;
-            }
-            return [
-                'id' => $videoId,
-                'title' => $snippet['title'] ?? '',
-                'published_at' => $snippet['publishedAt'] ?? '',
-                'thumbnail' => $snippet['thumbnails']['medium']['url']
-                    ?? $snippet['thumbnails']['default']['url'] ?? '',
-            ];
-        }, $videoResponse['items'] ?? []))),
+        'videos' => $videos,
     ];
 }
 

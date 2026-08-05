@@ -16,4 +16,9 @@ if ($postId > 0 && $content !== '') {
     $stmt->bindValue(':c', $content);
     $stmt->execute();
 }
-header('Location: index.php');
+$videoId = trim($_POST['video_id'] ?? '');
+$redirectUrl = 'index.php';
+if ($videoId !== '') {
+    $redirectUrl .= '?video_id=' . urlencode($videoId);
+}
+header('Location: ' . $redirectUrl);

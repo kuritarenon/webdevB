@@ -28,4 +28,9 @@ if ($postId > 0 && in_array($type, ['good', 'bad'], true)) {
             ->execute([':t' => $type, ':id' => (int)$row['id']]);
     }
 }
-header('Location: index.php');
+$videoId = trim($_POST['video_id'] ?? '');
+$redirectUrl = 'index.php';
+if ($videoId !== '') {
+    $redirectUrl .= '?video_id=' . urlencode($videoId);
+}
+header('Location: ' . $redirectUrl);

@@ -22,4 +22,9 @@ if ($postId > 0) {
         $dbh->rollBack();
     }
 }
-header('Location: index.php');
+$videoId = trim($_POST['video_id'] ?? '');
+$redirectUrl = 'index.php';
+if ($videoId !== '') {
+    $redirectUrl .= '?video_id=' . urlencode($videoId);
+}
+header('Location: ' . $redirectUrl);
